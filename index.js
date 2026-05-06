@@ -14,8 +14,7 @@ const authRoutes = require('./routes/auth');
 app.use('/auth', authRoutes);
 
 app.get('/', async (req, res) => {
-    res.send('<h1>Welcome</h1><p>Backend is running...</p>');
-    
+    res.send('<h1>Welcome!</h1><p>FreelancerHub running..</p>');
 });
 
 app.listen(PORT, () => {
