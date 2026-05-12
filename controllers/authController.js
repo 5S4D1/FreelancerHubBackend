@@ -2,8 +2,12 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { randomUUID } = require('crypto');
 const db = require('../DB/connect');
+const cloudinary = require('../CDN/cloudinary');
 
 const secret = process.env.JWT_SECRET;
+
+const FALLBACK_AVATAR_URL = 'https://res.cloudinary.com/dz6mwsw9d/image/upload/v1778526754/fallback_img.png';
+
 
 // REGISTER
 exports.register = async (req, res) => {
@@ -121,7 +125,7 @@ exports.login = async (req, res) => {
                 profile: {
                     first_name: user.first_name,
                     last_name: user.last_name,
-                    avatar_url: user.avatar_url,
+                    avatar_url: user.avatar_url || FALLBACK_AVATAR_URL,
                     location: user.location,
                     freelancer_type: user.freelancer_type,
                     english_level: user.english_level,
