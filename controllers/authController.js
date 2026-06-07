@@ -111,7 +111,65 @@ exports.login = async (req, res) => {
         const token = jwt.sign(
             { id: user.id, email: user.email, role: user.role },
             secret,
-            { expiresIn: '2h' }
+            { expiresIn: '2d' }
+        );
+
+        // Wallet summary (available, pending, withdrawn)
+        const [walletRows] = await db.query(`
+            SELECT balance_available, balance_pending, total_withdrawn
+            FROM wallets
+            WHERE user_id = ?`,
+            [user.id]
+        );
+        const wallet = walletRows[0] || { balance_available: 0, balance_pending: 0, total_withdrawn: 0 };
+
+        // Income + withdraw requests
+        const [incomeRows] = await db.query(`
+            SELECT 
+            SUM(CASE WHEN type='income' AND status='completed' THEN amount ELSE 0 END) AS total_income,
+            SUM(CASE WHEN type='withdrawal' AND status='pending' THEN amount ELSE 0 END) AS withdraw_request
+            FROM transactions
+            WHERE user_id = ?`,
+            [user.id]
+        );
+        const income = incomeRows[0] || { total_income: 0, withdraw_request: 0 };
+
+        // Project stats
+        const [projectRows] = await db.query(`
+            SELECT 
+            SUM(CASE WHEN status='completed' THEN 1 ELSE 0 END) AS completed_projects,
+            SUM(CASE WHEN status='ongoing' THEN 1 ELSE 0 END) AS ongoing_projects,
+            SUM(CASE WHEN status='canceled' THEN 1 ELSE 0 END) AS canceled_projects
+            FROM projects
+            WHERE client_id = ? OR id IN (
+            SELECT project_id FROM bids WHERE freelancer_id = ? AND status='accepted')`,
+            [user.id, user.id]
+        );
+        const projects = projectRows[0] || { completed_projects: 0, ongoing_projects: 0, canceled_projects: 0 };
+
+        // Task stats (⚠️ requires a task_orders table to track sales)
+        const [taskRows] = await db.query(`
+            SELECT 
+            SUM(CASE WHEN status='active' THEN 1 ELSE 0 END) AS tasks_sold,
+            SUM(CASE WHEN status='active' THEN 1 ELSE 0 END) AS ongoing_tasks,
+            SUM(CASE WHEN status='paused' THEN 1 ELSE 0 END) AS canceled_tasks
+            FROM tasks
+            WHERE freelancer_id = ?`,
+            [user.id]
+        );
+        const tasks = taskRows[0] || { tasks_sold: 0, ongoing_tasks: 0, canceled_tasks: 0 };
+
+        // Payment methods (⚠️ requires payment_methods table)
+        const paymentRows = [];
+
+        // Earning history
+        const [earningRows] = await db.query(`
+            SELECT amount, type, status, created_at
+            FROM transactions
+            WHERE user_id = ?
+            ORDER BY created_at DESC
+            LIMIT 20`,
+            [user.id]
         );
 
         res.json({
@@ -126,21 +184,25 @@ exports.login = async (req, res) => {
                     first_name: user.first_name,
                     last_name: user.last_name,
                     avatar_url: user.avatar_url || FALLBACK_AVATAR_URL,
-                    location: user.location,
-                    freelancer_type: user.freelancer_type,
-                    english_level: user.english_level,
-                    hourly_rate: user.hourly_rate,
-                    hours_per_week: user.hours_per_week,
-                    response_time: user.response_time,
-                    about: user.about,
-                    avg_rating: user.avg_rating,
-                    total_reviews: user.total_reviews,
-                    happy_clients: user.happy_clients,
-                    projects_done: user.projects_done,
-                    languages: user.languages
+                    freelancer_type: user.freelancer_type
+                },
+                stats: {
+                    total_income: income.total_income,
+                    withdraw_request: income.withdraw_request,
+                    pending_income: wallet.balance_pending,
+                    available_in_account: wallet.balance_available,
+                    completed_projects: projects.completed_projects,
+                    ongoing_projects: projects.ongoing_projects,
+                    canceled_projects: projects.canceled_projects,
+                    tasks_sold: tasks.tasks_sold,
+                    ongoing_tasks: tasks.ongoing_tasks,
+                    canceled_tasks: tasks.canceled_tasks,
+                    payment_methods: paymentRows,
+                    earning_history: earningRows
                 }
             }
         });
+
     } catch (err) {
         console.error('[LOGIN] ', err);
         res.status(500).json({ message: 'Server error' });
