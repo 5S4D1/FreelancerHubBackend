@@ -264,6 +264,8 @@ Returns a simple HTML welcome page confirming the server is running.
 | `education` | Profile education history |
 | `work_experience` | Profile work experience history |
 
+For the database schema and table definitions, see [DB_Schema.md](DB_Schema.md).
+
 ---
 
 ## Example Usage (cURL)
