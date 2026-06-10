@@ -13,10 +13,12 @@ app.use(cors());
 const authRoutes = require('./routes/auth');
 const avatarRoutes = require('./routes/avatar');
 const projectsRoutes = require('./routes/projects');
+const categoriesRoutes = require('./routes/categories');
 
 app.use('/api', avatarRoutes);
 app.use('/api', authRoutes);
 app.use('/api', projectsRoutes);
+app.use('/api', categoriesRoutes);
 
 app.get('/', async (req, res) => {
     res.send('<h1>Welcome!</h1><p>FreelancerHub running..</p>');

@@ -11,7 +11,11 @@ exports.createProject = async (req, res) => {
     const { title, description, status, category_id, price_type, min_price, max_price, experience_level, job_type, hiring_capacity } = req.body;
 
     if (!title || !description) {
-        return res.status(400).json({ message: 'Title, description, and client_id are required' });
+        return res.status(400).json(
+            {
+                message: 'Title, description, and client_id are required' 
+            }
+        );
     }
 
     try {
