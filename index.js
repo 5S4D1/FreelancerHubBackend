@@ -13,11 +13,13 @@ app.use(cors());
 const authRoutes = require('./routes/auth');
 const avatarRoutes = require('./routes/avatar');
 const projectsRoutes = require('./routes/projects');
+const profileRoutes = require('./routes/profile');
 const categoriesRoutes = require('./routes/categories');
 
 app.use('/api', avatarRoutes);
 app.use('/api', authRoutes);
 app.use('/api', projectsRoutes);
+app.use('/api', profileRoutes);
 app.use('/api', categoriesRoutes);
 
 app.get('/', async (req, res) => {
