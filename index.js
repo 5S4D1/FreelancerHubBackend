@@ -4,12 +4,13 @@ const express = require('express');
 const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
-const { v4: uuidv4 } = require('uuid');
 const db = require('./DB/connect');
 
 const app = express();
 const server = http.createServer(app);
 const PORT = 3000;
+
+const socketAuth = require('./middlewares/socketAuth');
 
 // Attach socket.io
 const io = new Server(server, {
@@ -18,6 +19,7 @@ const io = new Server(server, {
 
 app.use(express.json());
 app.use(cors());
+io.use(socketAuth);
 
 // Routes
 const authRoutes = require('./routes/auth');

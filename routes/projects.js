@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const { getProjects, createProject, updateProject, deleteProject } = require('../controllers/projectsController');
-const authenticationToken = require('../middleware/authMiddleware');
-const authorizeRoles = require('../middleware/roleMiddleware');
+const authenticationToken = require('../middlewares/authMiddleware');
+const authorizeRoles = require('../middlewares/roleMiddleware');
 
 // public routes
 router.get('/projects', getProjects);

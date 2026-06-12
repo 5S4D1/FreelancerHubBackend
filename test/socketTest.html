@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>FreelancerHub Chat Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    #messages {
+      border: 1px solid #ccc;
+      padding: 10px;
+      height: 300px;
+      overflow-y: auto;
+    }
+
+    .msg {
+      margin: 5px 0;
+    }
+
+    .me {
+      color: blue;
+    }
+
+    .other {
+      color: green;
+    }
+
+    .time {
+      font-size: 0.8em;
+      color: gray;
+      margin-left: 8px;
+    }
+
+    #chatbox {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>Conversation Chat</h2>
+  <div id="messages"></div>
+
+  <div id="chatbox">
+    <input id="messageInput" type="text" placeholder="Type a message..." />
+    <button id="sendBtn">Send</button>
+  </div>
+
+  <!-- Socket.IO client -->
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script>
+    // --- CONFIG (replace with real values) ---
+    const API_BASE = "http://localhost:3000/api";
+    const conversationId = "40b1b82f-3ef8-4767-b424-8fb40dfbda93"; // example conversation
+    const token = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEyMzQiLCJlbWFpbCI6ImNsaWVudDFAZW1haWwuY29tIiwicm9sZSI6ImNsaWVudCIsImlhdCI6MTc4MTI5OTgzMSwiZXhwIjoxNzgxNDcyNjMxfQ.t2WwRFQGAGojewBqDWz1bPYWzHHqDrAsxIId3VHCiZ4"; // must be a valid JWT
+
+    const messagesDiv = document.getElementById("messages");
+
+    // --- Load old messages via REST ---
+    fetch(`${API_BASE}/messages/${conversationId}`, {
+      headers: { "Authorization": token }
+    })
+      .then(res => res.json())
+      .then(messages => {
+        messages.forEach(msg => addMessage(msg, false));
+      });
+
+    // --- Connect to Socket.IO with JWT ---
+    const socket = io("http://localhost:3000", {
+      auth: { token: token }
+    });
+
+    socket.on("connect", () => {
+      console.log("Connected:", socket.id);
+      socket.emit("joinConversation", conversationId);
+    });
+
+    socket.on("connect_error", (err) => {
+      console.error("Connection failed:", err.message);
+      alert("Socket connection failed: " + err.message);
+    });
+
+    // --- Listen for new messages ---
+    socket.on("newMessage", (msg) => {
+      addMessage(msg, false);
+    });
+
+    // --- Send message ---
+    document.getElementById("sendBtn").addEventListener("click", () => {
+      const messageBody = document.getElementById("messageInput").value.trim();
+      if (!messageBody) return;
+
+      socket.emit("sendMessage", {
+        conversation_id: conversationId,
+        message_body: messageBody
+      });
+
+      document.getElementById("messageInput").value = "";
+    });
+
+    // --- Helper: render message with time ---
+    function addMessage(msg, isMe) {
+      const div = document.createElement("div");
+      div.className = "msg " + (isMe ? "me" : "other");
+
+      // Format timestamp nicely
+      const time = new Date(msg.sent_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      div.textContent = `${isMe ? "Me" : msg.sender_id}: ${msg.message_body}`;
+      const span = document.createElement("span");
+      span.className = "time";
+      span.textContent = `(${time})`;
+
+      div.appendChild(span);
+      messagesDiv.appendChild(div);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+  </script>
+</body>
+
+</html>

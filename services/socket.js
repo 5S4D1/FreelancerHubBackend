@@ -19,7 +19,7 @@ function setupSocket(io) {
                 await db.query(
                     `INSERT INTO messages (id, conversation_id, sender_id, message_body, is_read, sent_at)
                      VALUES (?, ?, ?, ?, 0, NOW())`,
-                    [messageId, conversation_id, sender_id, message_body]
+                    [messageId, conversation_id, socket.user.id, message_body]
                 );
 
                 await db.query(
@@ -30,7 +30,7 @@ function setupSocket(io) {
                 io.to(conversation_id).emit('newMessage', {
                     id: messageId,
                     conversation_id,
-                    sender_id,
+                    sender_id: socket.user.id,
                     message_body,
                     sent_at: new Date()
                 });
