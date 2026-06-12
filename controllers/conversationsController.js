@@ -33,7 +33,7 @@ exports.startConversation = async (req, res) => {
 
 // List all conversations for a user
 exports.listConversations = async (req, res) => {
-    const { user_id } = req.params;
+    const user_id = req.user.id;
 
     try {
         const [rows] = await db.query(
