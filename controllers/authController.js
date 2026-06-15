@@ -41,8 +41,8 @@ exports.register = async (req, res) => {
         // create minimal profile row; other fields use DB defaults
         const profileId = randomUUID();
         await db.query(
-            'INSERT INTO profiles (id, user_id, first_name, last_name) VALUES (?, ?, ?, ?)',
-            [profileId, userId, first_name || null, last_name || null]
+            'INSERT INTO profiles (id, user_id, first_name, last_name, avatar_url) VALUES (?, ?, ?, ?, ?)',
+            [profileId, userId, first_name || null, last_name || null, FALLBACK_AVATAR_URL]
         );
 
         console.log('User registered:', email);
