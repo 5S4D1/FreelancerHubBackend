@@ -29,6 +29,8 @@ const profileRoutes = require('./routes/profile');
 const categoriesRoutes = require('./routes/categories');
 const conversationsRoutes = require('./routes/conversations');
 const messagesRoutes = require('./routes/messages');
+const bidsRoutes = require('./routes/bids');
+const tasksRoutes = require('./routes/tasks');
 
 
 app.use('/api', avatarRoutes);
@@ -38,6 +40,8 @@ app.use('/api', profileRoutes);
 app.use('/api', categoriesRoutes);
 app.use('/api', conversationsRoutes);
 app.use('/api', messagesRoutes);
+app.use('/api', bidsRoutes);
+app.use('/api', tasksRoutes);
 
 app.get('/', async (req, res) => {
     res.send('<h1>Welcome!</h1><p>FreelancerHub running..</p>');

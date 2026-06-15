@@ -45,6 +45,8 @@ exports.register = async (req, res) => {
             [profileId, userId, first_name || null, last_name || null]
         );
 
+        console.log('User registered:', email);
+
         res.status(201).json({
             message: 'User registered successfully',
             user: {
@@ -171,6 +173,8 @@ exports.login = async (req, res) => {
             LIMIT 20`,
             [user.id]
         );
+
+        console.log('Login successful for user:', user.email);
 
         res.json({
             token,

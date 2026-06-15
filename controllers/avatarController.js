@@ -33,6 +33,7 @@ exports.updateAvatar = async (req, res) => {
             [uploadResult.secure_url, req.user.id]
         );
 
+        console.log('Avatar updated for user:', req.user.email);
         res.json({
             message: 'Avatar uploaded successfully',
             avatar_url: uploadResult.secure_url
@@ -56,7 +57,8 @@ exports.getAvatar = async (req, res) => {
         }
 
         const avatarUrl = rows[0].avatar_url || FALLBACK_AVATAR_URL;
-
+        
+        console.log('Avatar retrieved for user:', req.user.email);
         res.json({
             avatar_url: avatarUrl
         });
