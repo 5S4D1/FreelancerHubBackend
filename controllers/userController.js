@@ -10,8 +10,7 @@ exports.all_users = async (req, res) => {
                 p.avatar_url
             FROM users u
             JOIN profiles p ON u.id = p.user_id
-            WHERE u.role != 'admin'
-            LIMIT 10`
+            WHERE u.role != 'admin'`
         );
         res.status(200).json({ users });
     } catch (err) {
