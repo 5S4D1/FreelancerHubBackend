@@ -1,9 +1,13 @@
+// routes/tasks.js
 const express = require('express');
 const router = express.Router();
-const { addProjectToTask } = require('../controllers/tasksController');
+const { createTask, getTasks } = require('../controllers/tasksController');
 const authenticationToken = require('../middlewares/authMiddleware');
 
-// Link project to freelancer’s task
-router.post('/tasks/:taskId/add-project', authenticationToken, addProjectToTask);
+// Create a new task
+router.post('/tasks', authenticationToken, createTask);
+
+// Get all tasks
+router.get('/tasks', authenticationToken, getTasks);
 
 module.exports = router;
